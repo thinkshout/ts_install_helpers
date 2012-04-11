@@ -22,7 +22,7 @@
      * @param string $install_state 
      */
     function example_profile_post_install(&$install_state) {
-      include_once 'ts/install_helpers/ts_install_helpers_crud.inc'; // Load helper functions. Note: assumes this file is placed in the same folder as the .install file.
+      include_once 'ts_install_helpers/ts_install_helpers_crud.inc'; // Load helper functions. Note: assumes this file is placed in the same folder as the .install file.
       
       ///// Begin defining taxonomies, nodes and menu items. /////
       
