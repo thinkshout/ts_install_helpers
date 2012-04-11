@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Helper to create permissions for each role.
+ */
+function ts_install_helpers_crud_create_perms() {
+  // @TODO - Iterate through an array of permissions arrays, applying permissions to roles by role name.
+}
+
+/**
  * Helper function for creating taxonomy terms and vocabularies.
  * 
  * @param - $stubbed_vocabs
