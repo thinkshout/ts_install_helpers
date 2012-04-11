@@ -2,10 +2,43 @@
 
 /**
  * Helper function for creating taxonomy terms and vocabularies.
+ * 
+ * @param - $stubbed_vocabs
+ *   An associative array of taxonomy vocabularies that contain terms.
+ *   Supports nested arrays of hierarchical terms, as well as taxonomy term weighting.
  */
-function ts_install_helpers_crud_create_terms($stubbed_terms = array()) {
-  // @TODO - Create terms.
+function ts_install_helpers_crud_create_terms($stubbed_vocabs = array()) {
+  foreach ($stubbed_vocabs as $vocab => $terms) {
+    $vocabulary = taxonomy_vocabulary_machine_name_load($vocab);
+    // @TODO - Support vocabulary creation in install profile. Currently assumes vocabularies are managed in Features.
+    if ($vocabulary) {
+      foreach ($terms as $new_term) {
+        ts_install_helpers_crud_create_term($vocabulary, $new_term); // Create new terms, recursively.
+      }
+    }
+  }
 }
+
+/**
+ * Helper function for creating a single taxonomy term and its children, grandchildren, etc.
+ */
+function ts_install_helpers_crud_create_term($vocabulary, $new_term, $parent_tid = 0) {
+  $term = new stdClass();
+  $term->name = $new_term['name'];
+  $term->vid = $vocabulary->vid;
+  $term->format = filter_fallback_format();
+  $term->weight = ($new_term['weight']) ? $new_term['weight'] : 0;
+  $term->parent = $parent_tid;
+  taxonomy_term_save($term);
+
+  // If the current term has children defined, create them recursively.
+  if (is_array($new_term['children'])) {
+    foreach ($new_term['children'] as $child_term) {
+      ts_install_helpers_crud_create_term($vocabulary, $child_term, $term->tid);
+    }
+  }
+}
+
 
 /**
  * Helper function for creating placeholder content.
