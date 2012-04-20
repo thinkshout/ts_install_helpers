@@ -61,10 +61,6 @@ function ts_install_helpers_crud_create_content($stubbed_nodes = array()) {
   module_load_include('inc', 'devel_generate', 'image.devel_generate');
   module_load_include('inc', 'devel_generate', 'devel_generate.fields');
   
-  // First set default pathauto node pattern.
-  // Note: Definited in features but repeated here b/c it doesn't get picked up prior to generating content.
-  variable_set('pathauto_node_pattern', '[node:title]');
-  
   // Default node definition - stuff not captured added the way we want in node_object_prepare().
   $default_node = array(
     'type' => 'page',
