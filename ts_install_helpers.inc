@@ -3,7 +3,7 @@
 /**
  * Helper to create permissions for each role.
  */
-function ts_install_helpers_crud_create_perms() {
+function ts_install_helpers_create_perms() {
   // @TODO - Iterate through an array of permissions arrays, applying permissions to roles by role name.
 }
 
@@ -14,13 +14,13 @@ function ts_install_helpers_crud_create_perms() {
  *   An associative array of taxonomy vocabularies that contain terms.
  *   Supports nested arrays of hierarchical terms, as well as taxonomy term weighting.
  */
-function ts_install_helpers_crud_create_terms($stubbed_vocabs = array()) {
+function ts_install_helpers_create_terms($stubbed_vocabs = array()) {
   foreach ($stubbed_vocabs as $vocab => $terms) {
     $vocabulary = taxonomy_vocabulary_machine_name_load($vocab);
     // @TODO - Support vocabulary creation in install profile. Currently assumes vocabularies are managed in Features.
     if ($vocabulary) {
       foreach ($terms as $new_term) {
-        ts_install_helpers_crud_create_term($vocabulary, $new_term); // Create new terms, recursively.
+        ts_install_helpers_create_term($vocabulary, $new_term); // Create new terms, recursively.
       }
     }
   }
@@ -29,7 +29,7 @@ function ts_install_helpers_crud_create_terms($stubbed_vocabs = array()) {
 /**
  * Helper function for creating a single taxonomy term and its children, grandchildren, etc.
  */
-function ts_install_helpers_crud_create_term($vocabulary, $new_term, $parent_tid = 0) {
+function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0) {
   $term = new stdClass();
   $term->name = $new_term['name'];
   $term->vid = $vocabulary->vid;
@@ -41,7 +41,7 @@ function ts_install_helpers_crud_create_term($vocabulary, $new_term, $parent_tid
   // If the current term has children defined, create them recursively.
   if (is_array($new_term['children'])) {
     foreach ($new_term['children'] as $child_term) {
-      ts_install_helpers_crud_create_term($vocabulary, $child_term, $term->tid);
+      ts_install_helpers_create_term($vocabulary, $child_term, $term->tid);
     }
   }
 }
@@ -56,7 +56,7 @@ function ts_install_helpers_crud_create_term($vocabulary, $new_term, $parent_tid
  *   An associative array of nodes to be created, keyed off the path of each new node.
  *
  */
-function ts_install_helpers_crud_create_content($stubbed_nodes = array()) {
+function ts_install_helpers_create_content($stubbed_nodes = array()) {
   module_load_include('inc', 'devel_generate');
   module_load_include('inc', 'devel_generate', 'image.devel_generate');
   module_load_include('inc', 'devel_generate', 'devel_generate.fields');
@@ -118,7 +118,7 @@ function ts_install_helpers_crud_create_content($stubbed_nodes = array()) {
  *   An associative array of menu items to be created, keyed off the path of each new menu item.
  *
  */
-function ts_install_helpers_crud_create_menu_items($stubbed_menu_items = array()) {
+function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
   
   // Rebuild prior to starting menu creation to capture menu items built by other modules, like the contact module.
   menu_rebuild();
