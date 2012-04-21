@@ -34,12 +34,12 @@ function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0)
   $term->name = $new_term['name'];
   $term->vid = $vocabulary->vid;
   $term->format = filter_fallback_format();
-  $term->weight = ($new_term['weight']) ? $new_term['weight'] : 0;
+  $term->weight = (isset($new_term['weight'])) ? $new_term['weight'] : 0;
   $term->parent = $parent_tid;
   taxonomy_term_save($term);
 
   // If the current term has children defined, create them recursively.
-  if (is_array($new_term['children'])) {
+  if (isset($new_term['children'])) {
     foreach ($new_term['children'] as $child_term) {
       ts_install_helpers_create_term($vocabulary, $child_term, $term->tid);
     }
@@ -137,15 +137,17 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
     // Merge menu parameters defined in the install profile with some default values.
     $prepared_menu_items[$path] = array_merge($default_item, $stubbed_item);
     // Check if referenced menu exists - if not, we'll create it.
-    if (!in_array($stubbed_item['menu_name'], $existing_menus)) {
-      $new_menus[] = array('menu_name' => $stubbed_item['menu_name']);
+    if (!empty($stubbed_item['menu_name'])) {
+      if (!in_array($stubbed_item['menu_name'], $existing_menus)) {
+        $new_menus[] = array('menu_name' => $stubbed_item['menu_name']);
+      }
     }
   }
 
   // Create new menus.
 
   foreach ($new_menus as $menu) {
-    if (!empty($menu['menu_name'])) {
+    if (isset($menu['menu_name'])) {
       $menu['title'] = ucwords(str_replace('-', ' ', $menu['menu_name']));
       menu_save($menu);
     }
