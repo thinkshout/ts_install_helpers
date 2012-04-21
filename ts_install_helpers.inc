@@ -177,20 +177,11 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
 }
 /**
  * Helper to create beans.
+ * @TODO - Add validation and error handling..
  */
-function ts_install_helpers_create_beans($stubbed_beans) {
-  // Default bean definition.
-  $default_bean = array(
-    'language' => LANGUAGE_NONE,
-    'uid' => 1,
-    'label' => 'Stubbed bean', // Required
-    'title' => '',
-  );
-  
+function ts_install_helpers_create_beans($stubbed_beans) {  
   foreach ($stubbed_beans as $name => $stubbed_bean) {
-    // Merge bean parameters defined in the install profile with some default values.
-    $prepared_bean[$name] = array_merge($default_bean, $stubbed_bean);
-    $new_bean = bean_create(array('type' => $bean['type']));
+    $new_bean = bean_create(array('type' => $stubbed_bean['type']));
     $new_bean->label = $stubbed_bean['label'];
     $new_bean->title = $stubbed_bean['title'];
     $new_bean->delta = $name;
