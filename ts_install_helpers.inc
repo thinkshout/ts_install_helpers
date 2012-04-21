@@ -175,3 +175,28 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
   // Clear the menu cache to get rid of any funkiness.
   menu_cache_clear_all();
 }
+/**
+ * Helper to create beans.
+ */
+function ts_install_helpers_create_beans($stubbed_beans) {
+  // Default bean definition.
+  $default_bean = array(
+    'language' => LANGUAGE_NONE,
+    'uid' => 1,
+    'label' => 'Stubbed bean', // Required
+    'title' => '',
+  );
+  
+  foreach ($stubbed_beans as $name => $stubbed_bean) {
+    // Merge bean parameters defined in the install profile with some default values.
+    $prepared_bean[$name] = array_merge($default_bean, $stubbed_bean);
+    $new_bean = bean_create(array('type' => $bean['type']));
+    $new_bean->label = $stubbed_bean['label'];
+    $new_bean->title = $stubbed_bean['title'];
+    $new_bean->delta = $name;
+    foreach ($stubbed_bean['properties'] as $prop => $value) {
+      $new_bean->{$prop} = $value;
+    }
+    $new_bean->save();
+  }
+}
