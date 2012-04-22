@@ -145,14 +145,15 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
   }
 
   // Create new menus.
-
   foreach ($new_menus as $menu) {
     if (isset($menu['menu_name'])) {
       $menu['title'] = ucwords(str_replace('-', ' ', $menu['menu_name']));
+      $menu['description'] = $menu['title'];
       menu_save($menu);
     }
   }
-  
+
+  // Start creating menu items. @TODO - Debug certain menu item creating steps that require passing in 'module' parameter.
   foreach ($prepared_menu_items as $path => $item) { // First time around the horn, save menu links.
     $prepared_menu_items[$path]['link_path'] = drupal_get_normal_path($path);
     $prepared_menu_items[$path]['mlid'] = menu_link_save($prepared_menu_items[$path]);
