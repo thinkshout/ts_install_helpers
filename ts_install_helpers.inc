@@ -2,9 +2,40 @@
 
 /**
  * Helper to create permissions for each role.
+ * @param - $permissions
+ *    An associative array of already instantiated Drupal user roles (usually exported via Features)
+ *    Each array contains an array called 'permissions' which includes the machine names of each perm.
+ *    In addition, because of the Features bug found at: http://drupal.org/node/1265168#comment-5810726,
+ *        we pass in a second array called 'permissions_nocache' that contains arrays keyed off the module names of permissions
+ *        we need to inject directly into the database.
+ * @TODO - Monitor what's happening with this Features bug so that we can get rid of this latter hack.
  */
-function ts_install_helpers_create_perms() {
-  // @TODO - Iterate through an array of permissions arrays, applying permissions to roles by role name.
+function ts_install_helpers_create_perms($permissions = array()) {
+  $existing_roles = user_roles(); // Grab an array of roles that have been instantiated to this point.
+  foreach($permissions as $name => $role) { // Iterate through our $permissions array.
+    foreach($existing_roles as $rid => $existing_role) { // Check for matches, keying off human-readable role name.
+      if ($name == $existing_role) {
+        // Pass in a role ID and an array of permissions to apply to that role.
+        user_role_grant_permissions($rid, $role['permissions']);
+        // Then deal with our 'buggy' permissions that need to be inserted directly into the DB.
+        if (isset($role['permissions_nocache'])) {
+          foreach ($role['permissions_nocache'] as $module => $perms) {
+            foreach($perms as $perm) {
+              db_merge('role_permission')
+                ->key(array(
+                'rid' => $rid,
+                'permission' => $perm,
+              ))
+                ->fields(array(
+                'module' => $module,
+              ))
+                ->execute();
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
