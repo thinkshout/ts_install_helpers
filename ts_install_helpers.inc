@@ -223,3 +223,25 @@ function ts_install_helpers_create_beans($stubbed_beans) {
     $new_bean->save();
   }
 }
+
+/**
+ * Helper to create a test user account for each logged-in role.
+ * @param - $gmail_user
+ *     A gmail user name for creating placeholder email. Generally, TS creates a Google group for each project,
+ *     such as example@thinkshout.com. We use this address to create an account per address, such as example+admin@thinkshout.com.
+ * @param - $gmail_domain
+ *     Defaults to 'thinkshout.com.', though optionally a different domain can be passed into this helper.
+ */
+function ts_install_helpers_create_test_users($gmail_user = 'example', $gmail_domain = 'thinkshout.com') {
+  $roles = user_roles(TRUE);
+  foreach($roles as $rid => $role) {
+    $edit = array(); // Collection of parameters to pass to new user account.
+    $edit['name'] = $role;
+    $edit['mail'] = $gmail_user . '+' . str_replace(" ","_",$role) . '@' . $gmail_domain; // Google test email account.
+    $edit['init'] = $edit['mail'];
+    $edit['pass'] = $role; // Set the password to the role human-readable name.
+    $edit['roles'] = array($rid => $role); // Provide associated role.
+    $edit['status'] = 1; // Activate account.
+    user_save('', $edit);
+  }
+}
