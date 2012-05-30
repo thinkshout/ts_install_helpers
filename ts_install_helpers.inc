@@ -150,7 +150,13 @@ function ts_install_helpers_create_content($stubbed_nodes = array()) {
  *
  */
 function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
-  
+
+  // Reset the ctools exportables cache in case any of the router items are contained in exportables
+  // Specifically needed for links to custom apachesolr_search pages
+  if (module_exists('ctools')) {
+    ctools_export_load_object_reset();
+  }
+
   // Rebuild prior to starting menu creation to capture menu items built by other modules, like the contact module.
   menu_rebuild();
   
