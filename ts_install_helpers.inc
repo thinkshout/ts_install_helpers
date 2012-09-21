@@ -133,6 +133,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array()) {
         'type' => 'node',
         'link_title' => $prepared_node['link_title'],
         'menu_name' => $prepared_node['menu_name'],
+        'language' => $prepared_node['language'],
         'weight' => $prepared_node['weight'],
         'parent_path' => $prepared_node['parent_path'],
       );
