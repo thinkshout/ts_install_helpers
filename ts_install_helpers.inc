@@ -252,3 +252,61 @@ function ts_install_helpers_create_test_users($gmail_user = 'example', $gmail_do
     user_save('', $edit);
   }
 }
+/**
+ * Helper function for creating commerce products, including recurring types.
+ *
+ * @param - $stubbed_products
+ *  associative array of products to be created, keying off the machine name
+ *  and containing these values (required unless noted):
+ *  'type' (an existing product type like 'product')
+ *  'sku'
+ *  'title'
+ *  'price'
+ *  'recurrence' (not required unless 'type' is 'recurring': can be 'day'
+ *                'month', 'year', etc. See commerce_recurring module)
+ *
+ */
+function ts_install_helpers_create_products($stubbed_products = array()) {
+  foreach($stubbed_products as $machine_name => $values) {
+    if (!variable_get($machine_name, FALSE)) {
+      $form_state = array();
+      $form_state['values'] = array();
+      $form = array();
+      $form['#parents'] = array();
+      // Generate a new product object
+      $new_product = commerce_product_new($values['type']);
+      $new_product->status = TRUE;
+      $new_product->uid = 1;
+      $new_product->sku = $values['sku'];
+      $new_product->title = t($values['title']);
+      $new_product->created = $new_product->changed = time();
+
+      //commerce_price[und][0][amount]
+      $price = array(LANGUAGE_NONE => array(0 => array(
+        'amount' => $values['price'],
+        'currency_code' => commerce_default_currency(),
+      )));
+      $form_state['values']['commerce_price'] = $price;
+
+      //commerce_recurring_interval[und][0][interval]
+      if ($values['type'] == 'recurring') {
+        $interval = 1;
+        if ($values['recurrence'] == 'year'){
+          $values['recurrence'] = 'month';
+          $interval = 12;
+        }
+        $recurrence = array(LANGUAGE_NONE => array(0 => array(
+          'interval' => $interval,
+          'period' => $values['recurrence'],
+        )));
+        $form_state['values']['commerce_recurring_interval'] = $recurrence;
+      }
+      // Notify field widgets to save their field data
+      field_attach_submit('commerce_product', $new_product, $form, $form_state);
+
+      commerce_product_save($new_product);
+
+      variable_set($machine_name, $new_product->product_id);
+    }
+  }
+}
