@@ -288,11 +288,12 @@ function ts_install_helpers_create_products($stubbed_products = array()) {
       )));
       $form_state['values']['commerce_price'] = $price;
       //allow for an array of custom field values to be passed in:
-      if (isset($values['custom_fields']))
-        foreach($values['custom_fields'] as $field => $val) {
-          $new_product->$field = $val;
-          //$form_state['values'][$field] = $val;
-        };
+      //(this doesn't work)
+      //if (isset($values['custom_fields']))
+      //  foreach($values['custom_fields'] as $field => $val) {
+      //    $new_product->$field = $val;
+      //    $form_state['values'][$field] = $val;
+      //  };
       //commerce_recurring_interval[und][0][interval]
       if ($values['type'] == 'recurring') {
         $interval = 1;
