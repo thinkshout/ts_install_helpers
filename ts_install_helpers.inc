@@ -87,7 +87,7 @@ function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0)
  *   An associative array of nodes to be created, keyed off the path of each new node.
  *
  */
-function ts_install_helpers_create_content($stubbed_nodes = array()) {
+function ts_install_helpers_create_content($stubbed_nodes = array(), $return_type = 'menus') {
   module_load_include('inc', 'devel_generate');
   module_load_include('inc', 'devel_generate', 'image.devel_generate');
   module_load_include('inc', 'devel_generate', 'devel_generate.fields');
@@ -113,6 +113,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array()) {
   
   // Generate page nodes, optionally adding to an array of menu items to be created.
   $node_menu_items = array();
+  $nodes_created = array();
   foreach ($prepared_nodes as $path => $prepared_node) {
     $node = new stdClass();
     $node->type = $prepared_node['type'];
@@ -125,8 +126,20 @@ function ts_install_helpers_create_content($stubbed_nodes = array()) {
     $node->body[$node->language][0]['format'] = $prepared_node['format'];
     $node->pathauto_perform_alias = FALSE;
     $node->path = array('alias' => $path, 'pathauto' => FALSE);
+    if (!empty($prepared_node['custom_fields'])) {
+      foreach ($prepared_node['custom_fields'] as $field_id => $field_val) {
+        // Handle single-cardinality:
+        if (!isset($field_val[0])) {
+          $field_val = array(0 => $field_val);
+        }
+        $node->$field_id = array(
+          $node->language => $field_val,
+        );
+      }
+    }
     node_save($node);
-    
+    $nodes_created[] = $node;
+
     // If a 'link title' has been set for the node, prep menu link creation.
     if (!empty($prepared_node['link_title'])) {
       $node_menu_items[$path] = array(
@@ -138,6 +151,15 @@ function ts_install_helpers_create_content($stubbed_nodes = array()) {
         'parent_path' => $prepared_node['parent_path'],
       );
     }
+  }
+  switch ($return_type) {
+    case 'nodes':
+      return $nodes_created;
+
+    case 'both':
+      return array('nodes' => $nodes_created, 'menus' => $node_menu_items);
+
+    case 'menus':
   }
   
   return $node_menu_items;
