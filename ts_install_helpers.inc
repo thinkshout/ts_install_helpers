@@ -132,7 +132,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
         if (!isset($field_val[0])) {
           $field_val = array(0 => $field_val);
         }
-        $node->$field_id = array(
+        $node->{$field_id} = array(
           $node->language => $field_val,
         );
       }
@@ -310,7 +310,7 @@ function ts_install_helpers_create_products($stubbed_products = array()) {
       )));
       $form_state['values']['commerce_price'] = $price;
       //allow for an array of custom field values to be passed in:
-      //(this doesn't work)
+      //(this needs work)
       //if (isset($values['custom_fields']))
       //  foreach($values['custom_fields'] as $field => $val) {
       //    $new_product->$field = $val;
@@ -336,5 +336,37 @@ function ts_install_helpers_create_products($stubbed_products = array()) {
 
       variable_set($machine_name, $new_product->product_id);
     }
+  }
+}
+
+/**
+ * Creates an entity instance of any type. Useful for custom entity types.
+ *
+ * @param array of $stubbed_entities
+ *    Each should have 3 or 4 fields:
+ *    'type' => entity type
+ *    'bundle' => entity bundle
+ *    'properties' => entity built-in fields. 'label', often, etc.
+ *    'fields' => for fields added to the entity through the Drupal interface,
+ *      for "fieldable entities." Not required.
+ */
+function ts_install_helpers_create_entities($stubbed_entities) {
+  foreach ($stubbed_entities as $entity) {
+    $new_entity = entity_create($entity['type'], array('type' => $entity['bundle']));
+    $language = isset($entity['language']) ? $entity['language'] : LANGUAGE_NONE;
+    // Note: If no properties are set, no entity is created!
+    foreach ($entity['properties'] as $prop => $value) {
+      $new_entity->{$prop} = $value;
+    }
+    if (isset($entity['fields'])) {
+      foreach ($entity['fields'] as $prop => $value) {
+        // Handle single-cardinality:
+        if (!isset($value[0])) {
+          $value = array(0 => $value);
+        }
+        $new_entity->{$prop} = array($language => $value);
+      }
+    }
+    $new_entity->save();
   }
 }
