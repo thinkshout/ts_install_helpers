@@ -103,6 +103,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
     'menu_name' => 'main-menu',
     'weight' => 0,
     'parent_path' => '',
+    'expanded' => 0,
   );
   
   $prepared_nodes = array();
@@ -149,6 +150,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
         'language' => $prepared_node['language'],
         'weight' => $prepared_node['weight'],
         'parent_path' => $prepared_node['parent_path'],
+        'expanded' => $prepared_node['expanded'],
       );
     }
   }
