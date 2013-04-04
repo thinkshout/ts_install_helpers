@@ -46,15 +46,18 @@ function ts_install_helpers_create_perms($permissions = array()) {
  *   Supports nested arrays of hierarchical terms, as well as taxonomy term weighting.
  */
 function ts_install_helpers_create_terms($stubbed_vocabs = array()) {
+  $return_terms = array();
   foreach ($stubbed_vocabs as $vocab => $terms) {
     $vocabulary = taxonomy_vocabulary_machine_name_load($vocab);
     // @TODO - Support vocabulary creation in install profile. Currently assumes vocabularies are managed in Features.
     if ($vocabulary) {
+      $return_terms[$vocab] = array();
       foreach ($terms as $new_term) {
-        ts_install_helpers_create_term($vocabulary, $new_term); // Create new terms, recursively.
+        $return_terms[$vocab][] = ts_install_helpers_create_term($vocabulary, $new_term); // Create new terms, recursively.
       }
     }
   }
+  return $return_terms;
 }
 
 /**
@@ -68,13 +71,15 @@ function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0)
   $term->weight = (isset($new_term['weight'])) ? $new_term['weight'] : 0;
   $term->parent = $parent_tid;
   taxonomy_term_save($term);
-
+  
   // If the current term has children defined, create them recursively.
   if (isset($new_term['children'])) {
+    $term->children = array();
     foreach ($new_term['children'] as $child_term) {
-      ts_install_helpers_create_term($vocabulary, $child_term, $term->tid);
+      $term->children[] = ts_install_helpers_create_term($vocabulary, $child_term, $term->tid);
     }
   }
+  return $term;
 }
 
 
