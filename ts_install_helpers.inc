@@ -70,6 +70,17 @@ function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0)
   $term->format = filter_fallback_format();
   $term->weight = (isset($new_term['weight'])) ? $new_term['weight'] : 0;
   $term->parent = $parent_tid;
+  if (!empty($new_term['custom_fields'])) {
+    foreach ($new_term['custom_fields'] as $field_id => $field_val) {
+      // Handle single-cardinality:
+      if (!isset($field_val[0])) {
+        $field_val = array(0 => $field_val);
+      }
+      $term->{$field_id} = array(
+        LANGUAGE_NONE => $field_val,
+      );
+    }
+  }
   taxonomy_term_save($term);
   
   // If the current term has children defined, create them recursively.
