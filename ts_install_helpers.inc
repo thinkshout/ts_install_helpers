@@ -138,6 +138,9 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
     $node->title = $prepared_node['title'];
     $node->uid = $prepared_node['uid'];
     $node->language = $prepared_node['language'];
+    if (isset($prepared_node['promote'])) {
+      $node->promote = $prepared_node['promote'];
+    }
     $node->body[$node->language][0]['value'] = $prepared_node['body'];
     $node->body[$node->language][0]['summary'] = text_summary($node->body[$node->language][0]['value']);
     $node->body[$node->language][0]['format'] = $prepared_node['format'];
