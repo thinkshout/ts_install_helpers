@@ -40,7 +40,7 @@ function ts_install_helpers_create_perms($permissions = array()) {
 
 /**
  * Helper function for creating taxonomy terms and vocabularies.
- * 
+ *
  * @param - $stubbed_vocabs
  *   An associative array of taxonomy vocabularies that contain terms.
  *   Supports nested arrays of hierarchical terms, as well as taxonomy term weighting.
@@ -82,7 +82,7 @@ function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0)
     }
   }
   taxonomy_term_save($term);
-  
+
   // If the current term has children defined, create them recursively.
   if (isset($new_term['children'])) {
     $term->children = array();
@@ -107,7 +107,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
   module_load_include('inc', 'devel_generate');
   module_load_include('inc', 'devel_generate', 'image.devel_generate');
   module_load_include('inc', 'devel_generate', 'devel_generate.fields');
-  
+
   // Default node definition - stuff not captured added the way we want in node_object_prepare().
   $default_node = array(
     'type' => 'page',
@@ -121,13 +121,13 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
     'parent_path' => '',
     'expanded' => 0,
   );
-  
+
   $prepared_nodes = array();
   foreach ($stubbed_nodes as $path => $stub) {
     // Merge nodes parameters defined in this install profile with some default values.
     $prepared_nodes[$path] = array_merge($default_node, $stub);
   }
-  
+
   // Generate page nodes, optionally adding to an array of menu items to be created.
   $node_menu_items = array();
   $nodes_created = array();
@@ -184,7 +184,7 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
 
     case 'menus':
   }
-  
+
   return $node_menu_items;
 }
 
@@ -205,14 +205,14 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
 
   // Rebuild prior to starting menu creation to capture menu items built by other modules, like the contact module.
   menu_rebuild();
-  
+
   $default_item = array(
     'type' => 'codefied', // Nodes created in the install profile have 'node' type. Otherwise, assume 'codefied' as default.
     'menu_name' => 'main-menu',
     'weight' => 0,
     'parent_path' => '',
   );
-  
+
   $prepared_menu_items = array();
   $new_menus = array();
   $existing_menus = array_keys(menu_get_menus());
@@ -241,7 +241,7 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
     $prepared_menu_items[$path]['link_path'] = drupal_get_normal_path($path);
     $prepared_menu_items[$path]['mlid'] = menu_link_save($prepared_menu_items[$path]);
   }
-  
+
   foreach ($prepared_menu_items as $item) { // Second time around the horn, set an parent link ids need for menu hierarchy.
     if (!empty($item['parent_path'])) {
       $item['parent_path'] = drupal_get_normal_path($item['parent_path']);
@@ -255,7 +255,7 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
       menu_link_save($item);
     }
   }
-  
+
   // Clear the menu cache to get rid of any funkiness.
   menu_cache_clear_all();
 }
@@ -263,7 +263,7 @@ function ts_install_helpers_create_menu_items($stubbed_menu_items = array()) {
  * Helper to create beans.
  * @TODO - Add validation and error handling..
  */
-function ts_install_helpers_create_beans($stubbed_beans) {  
+function ts_install_helpers_create_beans($stubbed_beans) {
   foreach ($stubbed_beans as $name => $stubbed_bean) {
     $new_bean = bean_create(array('type' => $stubbed_bean['type']));
     $new_bean->label = $stubbed_bean['label'];
@@ -392,4 +392,31 @@ function ts_install_helpers_create_entities($stubbed_entities) {
     }
     $new_entity->save();
   }
+}
+
+/**
+ * Helper function for saving placeholder file fields.
+ *
+ * @param string $filename
+ *   Name that file should have after being saved.
+ * @param string $filepath
+ *   Place to put the saved file.
+ * @param string $url
+ *   Source of file, e.g. http://lorempixel.com/800/600/.
+ *
+ * @return int
+ *   The fid of the newly saved file.
+ */
+function ts_code_copy_file($filename, $filepath, $url) {
+  file_put_contents($filepath, file_get_contents($url));
+  $file = new StdClass();
+  $file->uid = 1;
+  $file->uri = $filepath;
+  $file->filename = $filename;
+  $file->filemime = file_get_mimetype($file->uri);
+  $file->status = 1;
+
+  $file = file_save($file);
+
+  return $file->fid;
 }
