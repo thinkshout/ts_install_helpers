@@ -407,7 +407,7 @@ function ts_install_helpers_create_entities($stubbed_entities) {
  * @return int
  *   The fid of the newly saved file.
  */
-function ts_code_copy_file($filename, $filepath, $url) {
+function ts_install_helpers_copy_file($filename, $filepath, $url) {
   file_put_contents($filepath, file_get_contents($url));
   $file = new StdClass();
   $file->uid = 1;
