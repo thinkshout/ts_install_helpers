@@ -269,10 +269,28 @@ function ts_install_helpers_create_beans($stubbed_beans) {
     $new_bean->label = $stubbed_bean['label'];
     $new_bean->title = $stubbed_bean['title'];
     $new_bean->delta = $name;
+    if (!empty($stubbed_bean['data'])) {
+      $new_bean->data = $stubbed_bean['data'];
+    }
     foreach ($stubbed_bean['properties'] as $prop => $value) {
       $new_bean->{$prop} = $value;
     }
     $new_bean->save();
+
+    // Handle field_collection items.
+    if (!empty($stubbed_bean['field_collections'])) {
+      foreach ($stubbed_bean['field_collections'] as $item_definition) {
+        $field_collection_item = entity_create(
+          'field_collection_item',
+          array('field_name' => $item_definition['field_name'])
+        );
+        foreach ($item_definition['properties'] as $fc_prop => $fc_value) {
+          $field_collection_item->{$fc_prop} = $fc_value;
+        }
+        $field_collection_item->setHostEntity('bean', $new_bean);
+        $field_collection_item->save();
+      }
+    }
   }
 }
 
