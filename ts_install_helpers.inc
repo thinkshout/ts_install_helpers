@@ -49,12 +49,18 @@ function ts_install_helpers_create_terms($stubbed_vocabs = array()) {
   $return_terms = array();
   foreach ($stubbed_vocabs as $vocab => $terms) {
     $vocabulary = taxonomy_vocabulary_machine_name_load($vocab);
-    // @TODO - Support vocabulary creation in install profile. Currently assumes vocabularies are managed in Features.
-    if ($vocabulary) {
-      $return_terms[$vocab] = array();
-      foreach ($terms as $new_term) {
-        $return_terms[$vocab][] = ts_install_helpers_create_term($vocabulary, $new_term); // Create new terms, recursively.
-      }
+    if (!$vocabulary) {
+      $edit = array(
+        'name' => $stubbed_vocabs[$vocab][0]['name'],
+        'machine_name' => $vocab,
+        'module' => 'taxonomy',
+      );
+      $vocabulary = (object) $edit;
+      taxonomy_vocabulary_save($vocabulary);
+    }
+    $return_terms[$vocab] = array();
+    foreach ($terms as $new_term) {
+      $return_terms[$vocab][] = ts_install_helpers_create_term($vocabulary, $new_term); // Create new terms, recursively.
     }
   }
   return $return_terms;
