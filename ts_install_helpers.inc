@@ -51,7 +51,7 @@ function ts_install_helpers_create_terms($stubbed_vocabs = array()) {
     $vocabulary = taxonomy_vocabulary_machine_name_load($vocab);
     if (!$vocabulary) {
       $edit = array(
-        'name' => $stubbed_vocabs[$vocab][0]['name'],
+        'name' => $vocab,
         'machine_name' => $vocab,
         'module' => 'taxonomy',
       );
@@ -75,6 +75,7 @@ function ts_install_helpers_create_term($vocabulary, $new_term, $parent_tid = 0)
   $term->vid = $vocabulary->vid;
   $term->format = filter_fallback_format();
   $term->weight = (isset($new_term['weight'])) ? $new_term['weight'] : 0;
+  $term->weight = (isset($new_term['description'])) ? $new_term['description'] : NULL;
   $term->parent = $parent_tid;
   if (!empty($new_term['custom_fields'])) {
     foreach ($new_term['custom_fields'] as $field_id => $field_val) {
