@@ -167,6 +167,24 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
       }
     }
     node_save($node);
+
+    // Handle field_collection items.
+    // @todo Abstract this into a method that takes an entity and an array of
+    // field collection items definitions to add to the entity.
+    if (!empty($prepared_node['field_collections'])) {
+      foreach ($prepared_node['field_collections'] as $item_definition) {
+        $field_collection_item = entity_create(
+          'field_collection_item',
+          array('field_name' => $item_definition['field_name'])
+        );
+        foreach ($item_definition['properties'] as $fc_prop => $fc_value) {
+          $field_collection_item->{$fc_prop} = $fc_value;
+        }
+        $field_collection_item->setHostEntity('node', $node);
+        $field_collection_item->save();
+      }
+    }
+
     $nodes_created[] = $node;
 
     // If a 'link title' has been set for the node, prep menu link creation.
