@@ -415,8 +415,13 @@ function ts_install_helpers_create_products($stubbed_products = array()) {
  *    'properties' => entity built-in fields. 'label', often, etc.
  *    'fields' => for fields added to the entity through the Drupal interface,
  *      for "fieldable entities." Not required.
+ *
+ * @return array
+ *   Array of created entities.
  */
 function ts_install_helpers_create_entities($stubbed_entities) {
+  $new_entities = array();
+
   foreach ($stubbed_entities as $entity) {
     $new_entity = entity_create($entity['type'], array('type' => $entity['bundle']));
     $language = isset($entity['language']) ? $entity['language'] : LANGUAGE_NONE;
@@ -434,7 +439,10 @@ function ts_install_helpers_create_entities($stubbed_entities) {
       }
     }
     $new_entity->save();
+    $new_entities[] = $new_entity;
   }
+
+  return $new_entities;
 }
 
 /**
