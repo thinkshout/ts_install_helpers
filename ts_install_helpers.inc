@@ -471,3 +471,24 @@ function ts_install_helpers_copy_file($filename, $filepath, $url) {
 
   return $file->fid;
 }
+
+
+/**
+ * Return an image from a random generator.
+ *
+ * @param $width
+ * @param $height
+ */
+function ts_install_image_source($width, $height) {
+  $generators = array(
+    "http://lorempixel.com/$width/$height/",
+    "http://hhhhold.com/{$width}x{$height}/",
+    "http://placeimg.com/$width/$height/any",
+    "http://placekitten.com/g/$width/$height",
+    "http://placecreature.com/$width/$height",
+  );
+
+  $index = rand(0, count($generators) - 1);
+
+  return $generators[$index];
+}
