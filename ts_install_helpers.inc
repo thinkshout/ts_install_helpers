@@ -459,17 +459,19 @@ function ts_install_helpers_create_entities($stubbed_entities) {
  *   The fid of the newly saved file.
  */
 function ts_install_helpers_copy_file($filename, $filepath, $url) {
-  file_put_contents($filepath, file_get_contents($url));
-  $file = new StdClass();
-  $file->uid = 1;
-  $file->uri = $filepath;
-  $file->filename = $filename;
-  $file->filemime = file_get_mimetype($file->uri);
-  $file->status = 1;
+  if (file_put_contents($filepath, file_get_contents($url))) {
+    $file = new StdClass();
+    $file->uid = 1;
+    $file->uri = $filepath;
+    $file->filename = $filename;
+    $file->filemime = file_get_mimetype($file->uri);
+    $file->status = 1;
 
-  $file = file_save($file);
+    $file = file_save($file);
 
-  return $file->fid;
+    return $file->fid;
+  }
+  return FALSE;
 }
 
 
@@ -479,7 +481,7 @@ function ts_install_helpers_copy_file($filename, $filepath, $url) {
  * @param $width
  * @param $height
  */
-function ts_install_image_source($width, $height) {
+function ts_install_helpers_image_source($width, $height) {
   $generators = array(
     "http://lorempixel.com/$width/$height/",
     "http://hhhhold.com/{$width}x{$height}/",
@@ -491,4 +493,46 @@ function ts_install_image_source($width, $height) {
   $index = rand(0, count($generators) - 1);
 
   return $generators[$index];
+}
+
+/** Create an image file and return the file object.
+ *
+ * Includes logic for discontinuing use of slow image providers.
+ */
+function ts_install_helpers_generate_image($width, $height, $image_name, $image_destination) {
+  global $generators;
+  if (is_null($generators)) {
+    $generators = array(
+      "http://lorempixel.com/$width/$height/",
+      "http://hhhhold.com/{$width}x{$height}/",
+      "http://placeimg.com/$width/$height/any",
+      "http://placekitten.com/g/$width/$height",
+      "http://placecreature.com/$width/$height",
+    );
+  }
+  $image_file_id = 0;
+  while (!$image_file_id) {
+    $start = time();
+    $index = array_rand($generators);
+    $image_source = $generators[$index];
+    $image_file_id = ts_install_helpers_copy_file($image_name, $image_destination, $image_source);
+    if ((time() - 10) > $start || !$image_file_id) {
+      // This service is taking too long. Remove it from the options.
+      if (count($generators) == 1) {
+        // Oops! we ran out. Maybe one of the other ones has stopped sucking:
+        $generators = array(
+          "http://lorempixel.com/$width/$height/",
+          "http://hhhhold.com/{$width}x{$height}/",
+          "http://placeimg.com/$width/$height/any",
+          "http://placekitten.com/g/$width/$height",
+          "http://placecreature.com/$width/$height",
+        );
+      }
+      else {
+        unset($generators[$index]);
+      }
+    }
+  }
+  $image_file = file_load($image_file_id);
+  return $image_file;
 }
