@@ -474,44 +474,52 @@ function ts_install_helpers_copy_file($filename, $filepath, $url) {
   return FALSE;
 }
 
-/** Create an image file and return the file object.
+/**
+ * Return a random image from an image generator.
  *
- * Includes logic for discontinuing use of slow image providers.
+ * Images are cached for performance on subsequent builds.
+ *
+ * @param $width
+ * @param $height
+ * @param $image_name
+ * @param $image_destination
+ * @param bool $reset
+ *
+ * @return object
+ *   Drupal file object.
  */
-function ts_install_helpers_generate_image($width, $height, $image_name, $image_destination) {
-  global $generators;
-  if (is_null($generators)) {
-    $generators = array(
-      "http://lorempixel.com/$width/$height/",
-      "http://hhhhold.com/{$width}x{$height}/",
-      "http://placeimg.com/$width/$height/any",
-      "http://placekitten.com/g/$width/$height",
-      "http://placecreature.com/$width/$height",
-    );
+function ts_install_helpers_generate_image($width, $height, $image_name, $image_destination, $reset = FALSE) {
+  static $seeds = array();
+
+  $seed_key = $width . '-' . $height;
+  if (isset($seeds[$seed_key])) {
+    $seeds[$seed_key] = $seeds[$seed_key] + 1;
   }
-  $image_file_id = 0;
-  while (!$image_file_id) {
-    $start = time();
+  else {
+    $seeds[$seed_key] = 0;
+  }
+
+  $generators = array(
+    "http://lorempixel.com/$width/$height/",
+    "http://hhhhold.com/{$width}x{$height}/",
+    "http://placeimg.com/$width/$height/any",
+    "http://placekitten.com/g/$width/$height",
+    "http://placecreature.com/$width/$height",
+  );
+
+  $temp_dir = sys_get_temp_dir() . '/ts_images/';
+  if (!is_dir($temp_dir)) {
+    mkdir($temp_dir);
+  }
+  $file = $temp_dir . "{$width}x{$height}-{$seeds[$seed_key]}";
+
+  if (!file_exists($file) || $reset) {
     $index = array_rand($generators);
-    $image_source = $generators[$index];
-    $image_file_id = ts_install_helpers_copy_file($image_name, $image_destination, $image_source);
-    if ((time() - 10) > $start || !$image_file_id) {
-      // This service is taking too long. Remove it from the options.
-      if (count($generators) == 1) {
-        // Oops! we ran out. Maybe one of the other ones has stopped sucking:
-        $generators = array(
-          "http://lorempixel.com/$width/$height/",
-          "http://hhhhold.com/{$width}x{$height}/",
-          "http://placeimg.com/$width/$height/any",
-          "http://placekitten.com/g/$width/$height",
-          "http://placecreature.com/$width/$height",
-        );
-      }
-      else {
-        unset($generators[$index]);
-      }
-    }
+    file_put_contents($file, file_get_contents($generators[$index]));
   }
+
+  $image_file_id = ts_install_helpers_copy_file($image_name, $image_destination, $file);
   $image_file = file_load($image_file_id);
+
   return $image_file;
 }
