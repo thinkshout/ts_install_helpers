@@ -150,9 +150,14 @@ function ts_install_helpers_create_content($stubbed_nodes = array(), $return_typ
     }
     if (isset($prepared_node['status'])) {
       $node->status = $prepared_node['status'];
-    }    $node->body[$node->language][0]['value'] = $prepared_node['body'];
-    $node->body[$node->language][0]['summary'] = text_summary($node->body[$node->language][0]['value']);
+    }
+    $node->body[$node->language][0]['value'] = $prepared_node['body'];
     $node->body[$node->language][0]['format'] = $prepared_node['format'];
+    if (isset($prepared_node['summary'])) {
+      $node->body[$node->language][0]['summary'] = $prepared_node['summary'];
+    } else {
+      $node->body[$node->language][0]['summary'] = text_summary($node->body[$node->language][0]['value']);
+    }
     $node->pathauto_perform_alias = FALSE;
     $node->path = array('alias' => $path, 'pathauto' => FALSE);
     if (!empty($prepared_node['custom_fields'])) {
@@ -453,7 +458,7 @@ function ts_install_helpers_create_entities($stubbed_entities) {
  * @param string $filepath
  *   Place to put the saved file.
  * @param string $url
- *   Source of file, e.g. http://lorempixel.com/800/600/.
+ *   Source of file, e.g. http://lorempixel.com/800/600/ or profiles/yourprofile/filename.pdf
  *
  * @return int
  *   The fid of the newly saved file.
