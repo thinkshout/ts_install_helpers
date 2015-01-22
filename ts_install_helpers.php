@@ -506,7 +506,6 @@ function ts_install_helpers_generate_image($width, $height, $image_name, $image_
 
   $generators = array(
     "http://lorempixel.com/$width/$height/",
-    "http://hhhhold.com/{$width}x{$height}/",
     "http://placeimg.com/$width/$height/any",
     "http://placekitten.com/g/$width/$height",
     "http://placecreature.com/$width/$height",
